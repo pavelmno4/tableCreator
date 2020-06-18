@@ -13,7 +13,6 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Pattern;
 
 public class Generator {
 
@@ -45,29 +44,18 @@ public class Generator {
         TsvParser parser = new TsvParser(parserSettings);
         List<String[]> dataList = parser.parseAll(new File(args[1]), "UTF-16");
 
-        /*
-        // Изменение ширины колонок под ширину данных
-        for(String[] str : dataList) {
-            for(int i = 0; i < str.length; i++) {
-                if(str[i].length() > columnWidths.get(i)) {
-                    columnWidths.set(i, str[i].length());
-                }
-            }
-        }
-         */
-
+        // Перенос слов
         for(int j = 0; j < dataList.size(); j++) {
             for (int i = 0; i < settings.getColumn().size(); i++) {
                 if (dataList.get(j)[i].length() > columnWidths.get(i)) {
-                    if(dataList.get(j)[i].contains("-")) {
-                        String[] parse = dataList.get(j)[i].split("(?=[-])");
-                        carryover(settings, dataList, j, i, parse);
-                    }
-
                     if(dataList.get(j)[i].contains(" ")) {
                         String[] parse = dataList.get(j)[i].split(" ");
                         carryover(settings, dataList, j, i, parse);
+                    }
 
+                    if(dataList.get(j)[i].contains("-")) {
+                        String[] parse = dataList.get(j)[i].split("(?=[-])");
+                        carryover(settings, dataList, j, i, parse);
                     }
                 }
             }
@@ -75,11 +63,6 @@ public class Generator {
 
         // Длина разделительной линии
         int separateLineReiteration = pageWidth;
-
-        /*for(int i = 0; i < columnWidths.size(); i++ ) {
-            separateLineReiteration += columnWidths.get(i) + 2;
-        }
-         */
 
         // Разделительная линия
         String separateLine = "";
@@ -109,10 +92,6 @@ public class Generator {
                                 "%-" +columnWidths.get(2)+ "s" + "%s",
                         dataList.get(i)[0], " | ", dataList.get(i)[1], " | ", dataList.get(i)[2], " | ");
                 bufferedWriter.write(data);
-
-                //if() {
-                //    bufferedWriter.write("\n" + separateLine);
-               // }
 
                 if(count >= pageHeight) {
                     bufferedWriter.write("\n~\n");
