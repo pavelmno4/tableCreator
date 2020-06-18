@@ -13,6 +13,7 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 public class Generator {
 
@@ -57,24 +58,16 @@ public class Generator {
 
         for(int j = 0; j < dataList.size(); j++) {
             for (int i = 0; i < settings.getColumn().size(); i++) {
-                if (dataList.get(j)[i].length() > columnWidths.get(2)) {
+                if (dataList.get(j)[i].length() > columnWidths.get(i)) {
+                    if(dataList.get(j)[i].contains("-")) {
+                        String[] parse = dataList.get(j)[i].split("(?=[-])");
+                        carryover(settings, dataList, j, i, parse);
+                    }
+
                     if(dataList.get(j)[i].contains(" ")) {
                         String[] parse = dataList.get(j)[i].split(" ");
+                        carryover(settings, dataList, j, i, parse);
 
-                        int k = j;
-                        dataList.get(j)[i] = parse[0];
-                        for(int n = 0; n < parse.length - 1; n++) {
-                            String[] line = new String[settings.getColumn().size()];
-                            for (int p = 0; p < line.length; p++) {
-                                if (p == i) {
-                                    line[p] = parse[n+1];
-                                } else {
-                                    line[p] = "";
-                                }
-                            }
-                            dataList.add(k+1, line);
-                            k++;
-                        }
                     }
                 }
             }
@@ -134,6 +127,24 @@ public class Generator {
         }
 
 
+    }
+
+    // Метод преноса строки
+    private static void carryover(Settings settings, List<String[]> dataList, int j, int i, String[] parse) {
+        int k = j;
+        dataList.get(j)[i] = parse[0];
+        for(int n = 0; n < parse.length - 1; n++) {
+            String[] line = new String[settings.getColumn().size()];
+            for (int p = 0; p < line.length; p++) {
+                if (p == i) {
+                    line[p] = parse[n+1];
+                } else {
+                    line[p] = "";
+                }
+            }
+            dataList.add(k+1, line);
+            k++;
+        }
     }
 
     // Метод создания файла настроек
