@@ -44,6 +44,7 @@ public class Generator {
         TsvParser parser = new TsvParser(parserSettings);
         List<String[]> dataList = parser.parseAll(new File(args[1]), "UTF-16");
 
+        /*
         // Изменение ширины колонок под ширину данных
         for(String[] str : dataList) {
             for(int i = 0; i < str.length; i++) {
@@ -52,12 +53,40 @@ public class Generator {
                 }
             }
         }
+         */
+
+        for(int j = 0; j < dataList.size(); j++) {
+            for (int i = 0; i < settings.getColumn().size(); i++) {
+                if (dataList.get(j)[i].length() > columnWidths.get(2)) {
+                    if(dataList.get(j)[i].contains(" ")) {
+                        String[] parse = dataList.get(j)[i].split(" ");
+
+                        int k = j;
+                        dataList.get(j)[i] = parse[0];
+                        for(int n = 0; n < parse.length - 1; n++) {
+                            String[] line = new String[settings.getColumn().size()];
+                            for (int p = 0; p < line.length; p++) {
+                                if (p == i) {
+                                    line[p] = parse[n+1];
+                                } else {
+                                    line[p] = "";
+                                }
+                            }
+                            dataList.add(k+1, line);
+                            k++;
+                        }
+                    }
+                }
+            }
+        }
 
         // Длина разделительной линии
-        int separateLineReiteration = 4;
-        for(int i = 0; i < columnWidths.size(); i++ ) {
+        int separateLineReiteration = pageWidth;
+
+        /*for(int i = 0; i < columnWidths.size(); i++ ) {
             separateLineReiteration += columnWidths.get(i) + 2;
         }
+         */
 
         // Разделительная линия
         String separateLine = "";
@@ -68,8 +97,8 @@ public class Generator {
         // Формат вывода заголовка
         String heading = String.format("| %-" +columnWidths.get(0)+ "s" + "%s" +
                                          "%-" +columnWidths.get(1)+ "s" + "%s" +
-                                         "%-" +columnWidths.get(2)+ "s" + "%s",
-                columnsTitle.get(0), " | ", columnsTitle.get(1), " | ", columnsTitle.get(2), " | ");
+                                         "%-" +columnWidths.get(2)+ "s" + "%s%n%s",
+                columnsTitle.get(0), " | ", columnsTitle.get(1), " | ", columnsTitle.get(2), " | ", separateLine);
 
 
 
@@ -82,11 +111,16 @@ public class Generator {
             int count = 1;
             for(int i = 0; i < dataList.size(); i++) {
                 count += 2;
-                data = String.format("%n%s%n| %-" +columnWidths.get(0)+ "s" + "%s" +
+                data = String.format("%n| %-" +columnWidths.get(0)+ "s" + "%s" +
                                 "%-" +columnWidths.get(1)+ "s" + "%s" +
                                 "%-" +columnWidths.get(2)+ "s" + "%s",
-                        separateLine, dataList.get(i)[0], " | ", dataList.get(i)[1], " | ", dataList.get(i)[2], " | ");
+                        dataList.get(i)[0], " | ", dataList.get(i)[1], " | ", dataList.get(i)[2], " | ");
                 bufferedWriter.write(data);
+
+                //if() {
+                //    bufferedWriter.write("\n" + separateLine);
+               // }
+
                 if(count >= pageHeight) {
                     bufferedWriter.write("\n~\n");
                     if(i != dataList.size()-1) {
