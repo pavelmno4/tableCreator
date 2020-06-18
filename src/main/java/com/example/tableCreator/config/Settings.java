@@ -38,7 +38,4 @@ public class Settings {
         this.column = column;
     }
 
-    public void addColumns(Column column) {
-        this.column.add(column);
-    }
 }
